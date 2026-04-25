@@ -80,7 +80,7 @@ export default function Chat() {
         });
       }
     });
-  }, [activeTab, messages]);
+  }, [activeTab]);
 
   // Scroll to bottom on new messages
   useEffect(() => {
@@ -88,7 +88,15 @@ export default function Chat() {
   }, [messages, activeTab]);
 
   function detectVessels(text) {
-    return vessels.filter(v => text.toLowerCase().includes(v.name.toLowerCase()));
+    const tl = text.toLowerCase();
+    return vessels.filter(v => {
+      const vl = v.name.toLowerCase();
+      // Full name match
+      if (tl.includes(vl)) return true;
+      // Any meaningful word in vessel name (skip MV/MT prefixes and short words)
+      const words = vl.split(' ').filter(w => w.length > 2 && w !== 'mv' && w !== 'mt' && w !== 'msc' && w !== 'the');
+      return words.some(w => tl.includes(w));
+    });
   }
 
   function getTabMessages(tab) {
@@ -118,6 +126,9 @@ export default function Chat() {
     });
     setInput('');
     setRoutingHint([]);
+    if (vesselIds.length > 0) {
+      setActiveTab(vesselIds[0]);
+    }
     inputRef.current?.focus();
   }
 
