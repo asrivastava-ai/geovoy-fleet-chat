@@ -76,7 +76,7 @@ export default function Chat() {
     tabMsgs.forEach(m => {
       if (!m.readBy || !m.readBy[user.uid]) {
         updateDoc(doc(db, 'messages', m.id), {
-          [`readBy.${user.uid}`]: serverTimestamp()
+          [`readBy.${user.uid}`]: true
         });
       }
     });
@@ -122,7 +122,7 @@ export default function Chat() {
       senderInitials: initials(profile?.name || '?'),
       timestamp: serverTimestamp(),
       vesselIds,
-      readBy: { [user.uid]: serverTimestamp() }
+      readBy: { [user.uid]: true }
     });
     setInput('');
     setRoutingHint([]);
