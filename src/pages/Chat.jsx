@@ -126,9 +126,6 @@ export default function Chat() {
     });
     setInput('');
     setRoutingHint([]);
-    if (vesselIds.length > 0) {
-      setActiveTab(vesselIds[0]);
-    }
     inputRef.current?.focus();
   }
 
