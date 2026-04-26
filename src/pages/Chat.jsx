@@ -107,7 +107,7 @@ export default function Chat() {
 
   function unreadCount(tab) {
     if (!user) return 0;
-    return getTabMessages(tab).filter(m => !m.readBy || !m.readBy[user.uid]).length;
+    return getTabMessages(tab).filter(m => m.senderId !== user.uid && (!m.readBy || !m.readBy[user.uid])).length;
   }
 
   async function sendMessage() {
@@ -189,36 +189,32 @@ export default function Chat() {
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg)' }}>
 
-      {/* Top bar */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 16px', height: 52, borderBottom: '1px solid var(--border)', background: 'var(--bg2)', flexShrink: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--accent-light)', letterSpacing: '0.15em' }}>GEOVOY</div>
-          <div style={{ width: 1, height: 14, background: 'var(--border2)' }} />
-          <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text)' }}>Fleet Ops</div>
-        </div>
+      {/* Top bar — compact for mobile */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 12px', height: 44, borderBottom: '1px solid var(--border)', background: 'var(--bg2)', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <button onClick={() => setShowVesselSettings(true)} title="My vessels" style={{ background: 'none', border: '1px solid var(--border2)', borderRadius: 'var(--radius)', padding: '5px 10px', color: 'var(--text2)', fontSize: 12 }}>
-            My vessels
+          <div style={{ fontFamily: 'var(--mono)', fontSize: 10, color: 'var(--accent-light)', letterSpacing: '0.12em' }}>GEOVOY</div>
+          <div style={{ width: 1, height: 12, background: 'var(--border2)' }} />
+          <div style={{ fontSize: 12, fontWeight: 500, color: 'var(--text)' }}>Fleet Ops</div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <button onClick={() => setShowVesselSettings(true)} style={{ background: 'none', border: '1px solid var(--border2)', borderRadius: 'var(--radius)', padding: '4px 8px', color: 'var(--text2)', fontSize: 11 }}>
+            Vessels
           </button>
           {profile?.role === 'admin' && (
-            <button onClick={() => setShowAdmin(true)} style={{ background: 'none', border: '1px solid var(--border2)', borderRadius: 'var(--radius)', padding: '5px 10px', color: 'var(--text2)', fontSize: 12 }}>
+            <button onClick={() => setShowAdmin(true)} style={{ background: 'none', border: '1px solid var(--border2)', borderRadius: 'var(--radius)', padding: '4px 8px', color: 'var(--text2)', fontSize: 11 }}>
               Admin
             </button>
           )}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            {(() => { const c = avatarColor(profile?.name); return (
-              <div style={{ width: 28, height: 28, borderRadius: '50%', background: c.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 600, color: c.color }}>
-                {initials(profile?.name || '')}
-              </div>
-            ); })()}
-            <span style={{ fontSize: 12, color: 'var(--text2)' }}>{profile?.name}</span>
-          </div>
-          <button onClick={() => signOut(auth)} style={{ background: 'none', border: 'none', color: 'var(--text3)', fontSize: 12, padding: '4px 6px' }}>Sign out</button>
+          {(() => { const c = avatarColor(profile?.name); return (
+            <div title={profile?.name + ' — tap to sign out'} style={{ width: 26, height: 26, borderRadius: '50%', background: c.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 600, color: c.color, cursor: 'pointer' }} onClick={() => { if(window.confirm('Sign out?')) signOut(auth); }}>
+              {initials(profile?.name || '')}
+            </div>
+          ); })()}
         </div>
       </div>
 
-      {/* Tabs */}
-      <div style={{ display: 'flex', borderBottom: '1px solid var(--border)', background: 'var(--bg2)', overflowX: 'auto', flexShrink: 0 }} className="tabs-bar">
+      {/* Tabs — sticky so always visible on mobile */}
+      <div style={{ display: 'flex', borderBottom: '1px solid var(--border)', background: 'var(--bg2)', overflowX: 'auto', flexShrink: 0, WebkitOverflowScrolling: 'touch', position: 'sticky', top: 0, zIndex: 10 }} className="tabs-bar">
         {tabs.map(t => {
           const u = unreadCount(t.id);
           const active = activeTab === t.id;
